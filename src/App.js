@@ -1,5 +1,7 @@
 import "./styles.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 const suggestions = [
   "abacus",
   "device",
@@ -8,27 +10,40 @@ const suggestions = [
   "topple",
   "green",
   "rest",
-  "api"
+  "api",
 ];
 
 export default function App() {
   const [inputValue, setInputValue] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [data, setData] = useState(null);
+
+  const fetchData = async () => {
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/comments"
+    );
+    setData(response.data);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleInputChange = (event) => {
     const inputValue = event.target.value;
     setInputValue(inputValue);
 
-    const filteredSuggestions = suggestions.filter(
+    const filteredSuggestions = data.filter(
       (suggestion) =>
-        suggestion.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+        suggestion.email.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
     );
 
     setFilteredSuggestions(filteredSuggestions);
+    console.log(filteredSuggestions);
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion);
+    setInputValue(suggestion.email);
     setFilteredSuggestions([]);
   };
 
@@ -41,10 +56,10 @@ export default function App() {
       <ul>
         {filteredSuggestions.map((suggestion) => (
           <li
-            key={suggestion}
+            key={suggestion.id}
             onClick={() => handleSuggestionClick(suggestion)}
           >
-            {suggestion}
+            {suggestion.email}
           </li>
         ))}
       </ul>
